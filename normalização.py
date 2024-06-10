@@ -3,18 +3,48 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 # Load the data
-data = pd.read_csv('merged_sem_outliers.csv')
+data_merged = pd.read_csv('merged_sem_outliers.csv')
+data_melb = pd.read_csv('melb_data.csv')
+data_dehli = pd.read_csv('Delhi_v2.csv')
+data_perth = pd.read_csv('perth_file.csv')
 
-numerical_features = data.select_dtypes(include=[np.number]).columns.tolist()
+numerical_features_merged = data_merged.select_dtypes(include=[np.number]).columns.tolist()
+numerical_features_melb = data_melb.select_dtypes(include=[np.number]).columns.tolist()
+numerical_features_dehli = data_dehli.select_dtypes(include=[np.number]).columns.tolist()
+numerical_features_perth = data_perth.select_dtypes(include=[np.number]).columns.tolist()
+
 
 print("\nColunas Numéricas Selecionadas para Normalização:")
-print(numerical_features)
+print("\nDados Numéricos Merged:")
+print(numerical_features_merged)
+print("\nDados Numéricos Melbourne:")
+print(numerical_features_melb)
+print("\nDados Numéricos Dehli:")
+print(numerical_features_dehli)
+print("\nDados Numéricos Perth:")
+print(numerical_features_perth)
 
 scaler = MinMaxScaler()
-data[numerical_features] = scaler.fit_transform(data[numerical_features])
+data_merged[numerical_features_merged] = scaler.fit_transform(data_merged[numerical_features_merged])
+data_melb[numerical_features_melb] = scaler.fit_transform(data_melb[numerical_features_melb])
+data_dehli[numerical_features_dehli] = scaler.fit_transform(data_dehli[numerical_features_dehli])
+data_perth[numerical_features_perth] = scaler.fit_transform(data_perth[numerical_features_perth])
 
 print("\nDados Normalizados:")
-print(data)
+print("\nDados Merged:")
+print(data_merged)
+print("\nDados Melbourne:")
+print(data_melb)
+print("\nDados Dehli:")
+print(data_dehli)
+print("\nDados Perth:")
+print(data_perth)
 
-data.to_csv('normalized_data.csv', index=False)
+data_merged.to_csv('normalized_merged_data.csv', index=False)
+data_melb.to_csv('normalized_melb_data.csv', index=False)
+data_dehli.to_csv('normalized_dehli_data.csv', index=False)
+data_perth.to_csv('normalized_perth_data.csv', index=False)
+
+
+
 
