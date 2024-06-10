@@ -15,3 +15,6 @@ data[numerical_features] = scaler.fit_transform(data[numerical_features])
 
 print("\nDados Normalizados:")
 print(data)
+
+data.to_csv('normalized_data.csv', index=False)
+
