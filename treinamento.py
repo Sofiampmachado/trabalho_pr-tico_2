@@ -73,6 +73,15 @@ mse_linear = mean_squared_error(y_val, y_pred_linear)
 mae_linear = mean_absolute_error(y_val, y_pred_linear)
 print(f'Regressão Linear - MSE: {mse_linear}, MAE: {mae_linear}')
 
+# Gráfico de Dispersão - Preço Real vs Preço Previsto (Regressão Linear)
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_val, y=y_pred_linear)
+plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
+plt.xlabel('Preço Real')
+plt.ylabel('Preço Previsto')
+plt.title('Preço Real vs Preço Previsto (Regressão Linear)')
+plt.show()
+
 # Treinamento do modelo Random Forest
 rf_model = RandomForestRegressor(random_state=42)
 rf_model.fit(X_train, y_train)
