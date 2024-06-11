@@ -7,17 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.impute import SimpleImputer
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.sparse import csr_matrix
-
-# Função para preencher valores NaN
-def fill_na(df):
-    for col in df.select_dtypes(include=[np.number]).columns:
-        df[col].fillna(df[col].mean(), inplace=True)
-    for col in df.select_dtypes(include=[object]).columns:
-        df[col].fillna(df[col].mode()[0], inplace=True)
-    return df
 
 # Carregar os dados normalizados
 data_dehli = pd.read_csv('normalized_dehli_data.csv')
@@ -25,16 +17,8 @@ data_melb = pd.read_csv('normalized_melb_data.csv')
 data_perth = pd.read_csv('normalized_perth_data.csv')
 data_merged = pd.read_csv('normalized_merged_data.csv')
 
-# Preencher valores NaN
-data_dehli = fill_na(data_dehli)
-data_melb = fill_na(data_melb)
-data_perth = fill_na(data_perth)
-data_merged = fill_na(data_merged)
-
 # Combinar os dados num único DataFrame
 data = pd.concat([data_dehli, data_melb, data_perth, data_merged], ignore_index=True)
-
-
 
 # Separação das características e do alvo
 features = data.drop(columns=['price'])
@@ -45,10 +29,16 @@ numerical_features = features.select_dtypes(include=[np.number]).columns.tolist(
 categorical_features = features.select_dtypes(exclude=[np.number]).columns.tolist()
 
 # Pipeline para processamento das colunas numéricas
-numerical_transformer = MinMaxScaler()
+numerical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='mean')),
+    ('scaler', MinMaxScaler())
+])
 
 # Pipeline para processamento das colunas categóricas
-categorical_transformer = OneHotEncoder(handle_unknown='ignore', sparse_output=True)
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=True))
+])
 
 # Combinar transformadores em um único pré-processador
 preprocessor = ColumnTransformer(
