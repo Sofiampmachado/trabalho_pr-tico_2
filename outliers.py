@@ -3,10 +3,18 @@ import pandas as pd
 
 # Função para remover outliers usando o método IQR
 def remove_outliers(df):
-    q1 = df.quantile(0.25)
-    q3 = df.quantile(0.75)
+    # Selecionar apenas as colunas numéricas
+    df_numeric = df.select_dtypes(include='number')
+
+    # Calcular Q1 (1º quartil) e Q3 (3º quartil)
+    q1 = df_numeric.quantile(0.25)
+    q3 = df_numeric.quantile(0.75)
     iqr = q3 - q1
-    return df[~((df < (q1 - 1.5 * iqr)) | (df > (q3 + 1.5 * iqr))).any(axis=1)]
+
+    # Filtrar os dados para remover os outliers
+    df_filtered = df[~((df_numeric < (q1 - 1.5 * iqr)) | (df_numeric > (q3 + 1.5 * iqr))).any(axis=1)]
+
+    return df_filtered
 
 
 # Caminhos dos arquivos CSV
@@ -29,7 +37,7 @@ for city, path in file_paths.items():
     print(f"Forma após remoção de outliers para {city}: {data_cleaned.shape}")
 
     # Salvar o DataFrame limpo em um novo arquivo CSV
-    output_path = f'C:/Users/santo/OneDrive/Desktop/lic.icd/2023-2024/elementos/trabalho pratico 2/cleaned_{city}_data.csv'
+    output_path = f'cleaned_{city}_data.csv'
     data_cleaned.to_csv(output_path, index=False)
 
     print(f"Remoção de outliers concluída para {city} e dados salvos em '{output_path}'.")
