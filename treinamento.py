@@ -100,3 +100,72 @@ plt.xlabel('Preço Real')
 plt.ylabel('Preço Previsto')
 plt.title('Preço Real vs Preço Previsto (Random Forest)')
 plt.show()
+
+
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+# Treinamento do modelo KNN
+knn_model = KNeighborsRegressor(n_neighbors=5)
+knn_model.fit(X_train, y_train)
+
+# Previsões e avaliação do modelo KNN
+y_pred_knn = knn_model.predict(X_val)
+mse_knn = mean_squared_error(y_val, y_pred_knn)
+mae_knn = mean_absolute_error(y_val, y_pred_knn)
+print(f'K-Nearest Neighbors - MSE: {mse_knn}, MAE: {mae_knn}')
+
+
+# Gráfico de Dispersão - Preço Real vs Preço Previsto (KNN)
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_val, y=y_pred_knn)
+plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
+plt.xlabel('Preço Real')
+plt.ylabel('Preço Previsto')
+plt.title('Preço Real vs Preço Previsto (K-Nearest Neighbors)')
+plt.show()
+
+from sklearn.svm import SVR
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+# Treinamento do modelo SVR
+svr_model = SVR(kernel='rbf')
+svr_model.fit(X_train, y_train)
+
+# Previsões e avaliação do modelo SVR
+y_pred_svr = svr_model.predict(X_val)
+mse_svr = mean_squared_error(y_val, y_pred_svr)
+mae_svr = mean_absolute_error(y_val, y_pred_svr)
+print(f'Support Vector Regression - MSE: {mse_svr}, MAE: {mae_svr}')
+
+
+# Gráfico de Dispersão - Preço Real vs Preço Previsto (SVR)
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_val, y=y_pred_svr)
+plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
+plt.xlabel('Preço Real')
+plt.ylabel('Preço Previsto')
+plt.title('Preço Real vs Preço Previsto (Support Vector Regression)')
+plt.show()
+
+from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+# Treinamento do modelo de Redes Neurais
+nn_model = MLPRegressor(hidden_layer_sizes=(100, 50), random_state=42, max_iter=500)
+nn_model.fit(X_train, y_train)
+
+# Previsões e avaliação do modelo de Redes Neurais
+y_pred_nn = nn_model.predict(X_val)
+mse_nn = mean_squared_error(y_val, y_pred_nn)
+mae_nn = mean_absolute_error(y_val, y_pred_nn)
+print(f'Redes Neurais - MSE: {mse_nn}, MAE: {mae_nn}')
+
+# Gráfico de Dispersão - Preço Real vs Preço Previsto (Redes Neurais)
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_val, y=y_pred_nn)
+plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
+plt.xlabel('Preço Real')
+plt.ylabel('Preço Previsto')
+plt.title('Preço Real vs Preço Previsto (Redes Neurais)')
+plt.show()
