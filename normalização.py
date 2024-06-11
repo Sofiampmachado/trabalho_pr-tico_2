@@ -4,9 +4,9 @@ from sklearn.preprocessing import MinMaxScaler
 
 # Load the data
 data_merged = pd.read_csv('merged_sem_outliers.csv')
-data_melb = pd.read_csv('C:/Users/santo/OneDrive/Desktop/lic.icd/2023-2024/elementos/trabalho pratico 2/cleaned_melb_data.csv')
-data_dehli = pd.read_csv('C:/Users/santo/OneDrive/Desktop/lic.icd/2023-2024/elementos/trabalho pratico 2/cleaned_dehli_data.csv')
-data_perth = pd.read_csv('C:/Users/santo/OneDrive/Desktop/lic.icd/2023-2024/elementos/trabalho pratico 2/cleaned_perth_data.csv')
+data_melb = pd.read_csv('cleaned_melb_data.csv')
+data_dehli = pd.read_csv('cleaned_dehli_data.csv')
+data_perth = pd.read_csv('cleaned_perth_data.csv')
 
 data_merged = data_merged.dropna()
 data_melb = data_melb.dropna()

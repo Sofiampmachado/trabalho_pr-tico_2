@@ -11,9 +11,9 @@ def remove_outliers(df):
 
 # Caminhos dos arquivos CSV
 file_paths = {
-    'dehli': 'C:/Users/santo/OneDrive/Desktop/lic.icd/2023-2024/elementos/trabalho pratico 2/normalized_dehli_data.csv',
-    'melb': 'C:/Users/santo/OneDrive/Desktop/lic.icd/2023-2024/elementos/trabalho pratico 2/normalized_melb_data.csv',
-    'perth': 'C:/Users/santo/OneDrive/Desktop/lic.icd/2023-2024/elementos/trabalho pratico 2/normalized_perth_data.csv'
+    'dehli': 'normalized_dehli_data.csv',
+    'melb': 'normalized_melb_data.csv',
+    'perth': 'normalized_perth_data.csv'
 }
 
 # Processar cada arquivo
