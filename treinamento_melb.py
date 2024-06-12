@@ -134,4 +134,4 @@ for model, name in models:
 results_df = pd.DataFrame(results)
 print(f'Valores de MSE e MAE de cada método de aprendizagem automática testado:')
 print(results_df)
-results_df.to_csv('results_perth.csv', index=False)
+results_df.to_csv('results_melb.csv', index=False)
