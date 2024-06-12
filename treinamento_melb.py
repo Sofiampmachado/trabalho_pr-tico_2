@@ -30,8 +30,8 @@ data_melb = pd.read_csv('cleaned_melb_data.csv')
 data_perth = pd.read_csv('cleaned_perth_data.csv')
 
 # Concatenar os dados de Dehli e Melbourne para treinamento
-data_train = pd.concat([data_dehli, data_melb], ignore_index=True)
-data_test = data_perth
+data_train = pd.concat([data_dehli, data_dehli], ignore_index=True)
+data_test = data_melb
 
 # Remover colunas não desejadas (se aplicável)
 data_train = data_train.drop(columns=['Unnamed: 0'], errors='ignore')
@@ -135,5 +135,3 @@ results_df = pd.DataFrame(results)
 print(f'Valores de MSE e MAE de cada método de aprendizagem automática testado:')
 print(results_df)
 results_df.to_csv('results_perth.csv', index=False)
-
-
