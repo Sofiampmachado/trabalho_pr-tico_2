@@ -6,10 +6,16 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.impute import SimpleImputer
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
+from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+import os
+os.environ['LOKY_MAX_CPU_COUNT'] = '4'  # ou o número de núcleos desejado
+
 
 # Carregar os dados normalizados
 data_dehli = pd.read_csv('normalized_dehli_data.csv')
@@ -18,7 +24,8 @@ data_perth = pd.read_csv('normalized_perth_data.csv')
 data_merged = pd.read_csv('normalized_merged_data.csv')
 
 # Combinar os dados num único DataFrame
-data = pd.concat([data_dehli, data_melb, data_perth, data_merged], ignore_index=True)
+data = data_merged
+
 
 # Separação das características e do alvo
 features = data.drop(columns=['price'])
@@ -102,9 +109,6 @@ plt.title('Preço Real vs Preço Previsto (Random Forest)')
 plt.show()
 
 
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-
 # Treinamento do modelo KNN
 knn_model = KNeighborsRegressor(n_neighbors=5)
 knn_model.fit(X_train, y_train)
@@ -125,8 +129,6 @@ plt.ylabel('Preço Previsto')
 plt.title('Preço Real vs Preço Previsto (K-Nearest Neighbors)')
 plt.show()
 
-from sklearn.svm import SVR
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Treinamento do modelo SVR
 svr_model = SVR(kernel='rbf')
@@ -148,11 +150,9 @@ plt.ylabel('Preço Previsto')
 plt.title('Preço Real vs Preço Previsto (Support Vector Regression)')
 plt.show()
 
-from sklearn.neural_network import MLPRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Treinamento do modelo de Redes Neurais
-nn_model = MLPRegressor(hidden_layer_sizes=(100, 50), random_state=42, max_iter=500)
+nn_model = MLPRegressor(hidden_layer_sizes=(100, 50), random_state=42, max_iter=100)
 nn_model.fit(X_train, y_train)
 
 # Previsões e avaliação do modelo de Redes Neurais
