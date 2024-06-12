@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-# Load the data
 data_merged = pd.read_csv('merged_sem_outliers.csv')
 data_melb = pd.read_csv('cleaned_melb_data.csv')
 data_dehli = pd.read_csv('cleaned_dehli_data.csv')
@@ -17,8 +16,6 @@ numerical_features_merged = data_merged.select_dtypes(include=[np.number]).colum
 numerical_features_melb = data_melb.select_dtypes(include=[np.number]).columns.tolist()
 numerical_features_dehli = data_dehli.select_dtypes(include=[np.number]).columns.tolist()
 numerical_features_perth = data_perth.select_dtypes(include=[np.number]).columns.tolist()
-
-
 
 print("\nColunas Numéricas Selecionadas para Normalização:")
 print("\nDados Numéricos Merged:")
@@ -50,5 +47,3 @@ data_merged.to_csv('normalized_merged_data.csv', index=False)
 data_melb.to_csv('normalized_melb_data.csv', index=False)
 data_dehli.to_csv('normalized_dehli_data.csv', index=False)
 data_perth.to_csv('normalized_perth_data.csv', index=False)
-
-

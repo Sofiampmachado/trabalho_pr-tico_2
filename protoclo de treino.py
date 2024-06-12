@@ -35,10 +35,12 @@ y = data_imputed['price']
 # Dividir o dataset em treino e teste
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+
 def print_metrics(y_true, y_pred):
     print(f'Mean Squared Error: {mean_squared_error(y_true, y_pred)}')
     print(f'Mean Absolute Error: {mean_absolute_error(y_true, y_pred)}')
     print(f'R2 Score: {r2_score(y_true, y_pred)}')
+
 
 def train_and_evaluate_model(model, model_name):
     model.fit(X_train, y_train)
@@ -53,6 +55,7 @@ def train_and_evaluate_model(model, model_name):
 
     scores = cross_val_score(model, X, y, cv=5, scoring='neg_mean_squared_error')
     print(f'Cross-Validation MSE: {scores.mean()} (+/- {scores.std()})')
+
 
 models = {
     'Linear Regression': LinearRegression(),
@@ -69,7 +72,8 @@ param_grid = {
     'learning_rate': [0.01, 0.1, 0.5],
     'max_depth': [3, 5, 7]
 }
-grid_search = GridSearchCV(GradientBoostingRegressor(random_state=42), param_grid, cv=5, scoring='neg_mean_squared_error')
+grid_search = GridSearchCV(GradientBoostingRegressor(random_state=42), param_grid, cv=5,
+                           scoring='neg_mean_squared_error')
 grid_search.fit(X_train, y_train)
 
 best_model = grid_search.best_estimator_
