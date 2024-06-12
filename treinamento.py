@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
@@ -13,19 +14,33 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-import os
+
 os.environ['LOKY_MAX_CPU_COUNT'] = '4'  # ou o número de núcleos desejado
 
 
+# Configurações de exibição do pandas
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', 1000)
+pd.set_option('display.float_format', lambda x: f'{x:.4f}')
+
+
 # Carregar os dados normalizados
-data_dehli = pd.read_csv('normalized_dehli_data.csv')
-data_melb = pd.read_csv('normalized_melb_data.csv')
-data_perth = pd.read_csv('normalized_perth_data.csv')
-data_merged = pd.read_csv('normalized_merged_data.csv')
+data_dehli = pd.read_csv('cleaned_dehli_data.csv')
+data_melb = pd.read_csv('cleaned_melb_data.csv')
+data_perth = pd.read_csv('cleaned_perth_data.csv')
 
 # Concatenar os dados de Dehli e Melbourne para treinamento
 data_train = pd.concat([data_dehli, data_melb], ignore_index=True)
 data_test = data_perth
+
+# Remover colunas não desejadas (se aplicável)
+data_train = data_train.drop(columns=['Unnamed: 0'], errors='ignore')
+data_test = data_test.drop(columns=['Unnamed: 0'], errors='ignore')
+
+# Garantir que ambos os conjuntos de dados tenham as mesmas colunas
+common_columns = data_train.columns.intersection(data_test.columns)
+data_train = data_train[common_columns]
+data_test = data_test[common_columns]
 
 # Separação das características e do alvo
 features_train = data_train.drop(columns=['price'])
@@ -61,129 +76,63 @@ preprocessor = ColumnTransformer(
 features_train_processed = preprocessor.fit_transform(features_train)
 features_test_processed = preprocessor.transform(features_test)
 
-
+# Dividir os dados de treinamento em conjuntos de treino e validação
 X_train, X_val, y_train, y_val = train_test_split(features_train_processed, target_train, test_size=0.1765, random_state=42)
-
 
 # Verificar as proporções dos conjuntos
 print(f"Tamanho do conjunto de treino: {X_train.shape[0]}")
 print(f"Tamanho do conjunto de validação: {X_val.shape[0]}")
 print(f"Tamanho do conjunto de teste: {features_test_processed.shape[0]}")
 
-# Treinamento do modelo de Regressão Linear
-linear_model = LinearRegression()
-linear_model.fit(X_train, y_train)
+# Função para treinar e avaliar modelos
+def train_and_evaluate_model(model, X_train, y_train, X_val, y_val, X_test, y_test, model_name):
+    model.fit(X_train, y_train)
+    y_pred_val = model.predict(X_val)
+    y_pred_test = model.predict(X_test)
+    mse_val = mean_squared_error(y_val, y_pred_val)
+    mae_val = mean_absolute_error(y_val, y_pred_val)
+    mse_test = mean_squared_error(y_test, y_pred_test)
+    mae_test = mean_absolute_error(y_test, y_pred_test)
+    print(f'{model_name} - Validação MSE: {mse_val}, MAE: {mae_val}')
+    print(f'{model_name} - Teste MSE: {mse_test}, MAE: {mae_test}')
+    sns.scatterplot(x=y_val, y=y_pred_val)
+    plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
+    plt.xlabel('Preço Real (Validação)')
+    plt.ylabel('Preço Previsto (Validação)')
+    plt.title(f'Preço Real vs Preço Previsto ({model_name}) - Validação')
+    plt.show()
+    sns.scatterplot(x=y_test, y=y_pred_test)
+    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
+    plt.xlabel('Preço Real (Teste)')
+    plt.ylabel('Preço Previsto (Teste)')
+    plt.title(f'Preço Real vs Preço Previsto ({model_name}) - Teste')
+    plt.show()
+    return mse_val, mae_val, mse_test, mae_test
 
-# Previsões e avaliação do modelo de Regressão Linear
-y_pred_linear = linear_model.predict(X_val)
-mse_linear = mean_squared_error(y_val, y_pred_linear)
-mae_linear = mean_absolute_error(y_val, y_pred_linear)
-print(f'Regressão Linear - MSE: {mse_linear}, MAE: {mae_linear}')
+# Treinamento e avaliação dos modelos
+models = [
+    (LinearRegression(), "Regressão Linear"),
+    (RandomForestRegressor(random_state=42), "Random Forest"),
+    (KNeighborsRegressor(n_neighbors=5), "K-Nearest Neighbors"),
+    (SVR(kernel='rbf'), "Support Vector Regression"),
+    (MLPRegressor(hidden_layer_sizes=(256, 128, 64, 32), random_state=42, max_iter=100), "Redes Neuronais")
+]
 
-# Gráfico de Dispersão - Preço Real vs Preço Previsto (Regressão Linear)
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=y_val, y=y_pred_linear)
-plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
-plt.xlabel('Preço Real')
-plt.ylabel('Preço Previsto')
-plt.title('Preço Real vs Preço Previsto (Regressão Linear)')
-plt.show()
+results = []
 
-# Treinamento do modelo Random Forest
-rf_model = RandomForestRegressor(random_state=42)
-rf_model.fit(X_train, y_train)
+for model, name in models:
+    mse_val, mae_val, mse_test, mae_test = train_and_evaluate_model(model, X_train, y_train, X_val, y_val, features_test_processed, target_test, name)
+    results.append({
+        'Modelo': name,
+        'Validação MSE': mse_val,
+        'Validação MAE': mae_val,
+        'Teste MSE': mse_test,
+        'Teste MAE': mae_test
+    })
 
-# Previsões e avaliação do modelo Random Forest
-y_pred_rf = rf_model.predict(X_val)
-mse_rf = mean_squared_error(y_val, y_pred_rf)
-mae_rf = mean_absolute_error(y_val, y_pred_rf)
-print(f'Random Forest - MSE: {mse_rf}, MAE: {mae_rf}')
-
-# Gráfico de Dispersão - Preço Real vs Preço Previsto (Random Forest)
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=y_val, y=y_pred_rf)
-plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
-plt.xlabel('Preço Real')
-plt.ylabel('Preço Previsto')
-plt.title('Preço Real vs Preço Previsto (Random Forest)')
-plt.show()
-
-
-# Treinamento do modelo KNN
-knn_model = KNeighborsRegressor(n_neighbors=5)
-knn_model.fit(X_train, y_train)
-
-# Previsões e avaliação do modelo KNN
-y_pred_knn = knn_model.predict(X_val)
-mse_knn = mean_squared_error(y_val, y_pred_knn)
-mae_knn = mean_absolute_error(y_val, y_pred_knn)
-print(f'K-Nearest Neighbors - MSE: {mse_knn}, MAE: {mae_knn}')
-
-
-# Gráfico de Dispersão - Preço Real vs Preço Previsto (KNN)
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=y_val, y=y_pred_knn)
-plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
-plt.xlabel('Preço Real')
-plt.ylabel('Preço Previsto')
-plt.title('Preço Real vs Preço Previsto (K-Nearest Neighbors)')
-plt.show()
-
-
-# Treinamento do modelo SVR
-svr_model = SVR(kernel='rbf')
-svr_model.fit(X_train, y_train)
-
-# Previsões e avaliação do modelo SVR
-y_pred_svr = svr_model.predict(X_val)
-mse_svr = mean_squared_error(y_val, y_pred_svr)
-mae_svr = mean_absolute_error(y_val, y_pred_svr)
-print(f'Support Vector Regression - MSE: {mse_svr}, MAE: {mae_svr}')
-
-
-# Gráfico de Dispersão - Preço Real vs Preço Previsto (SVR)
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=y_val, y=y_pred_svr)
-plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
-plt.xlabel('Preço Real')
-plt.ylabel('Preço Previsto')
-plt.title('Preço Real vs Preço Previsto (Support Vector Regression)')
-plt.show()
-
-
-# Treinamento do modelo de Redes Neurais
-nn_model = MLPRegressor(hidden_layer_sizes=(256, 128, 64, 32), random_state=42, max_iter=50)
-nn_model.fit(X_train, y_train)
-
-# Previsões e avaliação do modelo de Redes Neurais
-y_pred_nn = nn_model.predict(X_val)
-mse_nn = mean_squared_error(y_val, y_pred_nn)
-mae_nn = mean_absolute_error(y_val, y_pred_nn)
-print(f'Redes Neurais - MSE: {mse_nn}, MAE: {mae_nn}')
-
-# Gráfico de Dispersão - Preço Real vs Preço Previsto (Redes Neurais)
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=y_val, y=y_pred_nn)
-plt.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'k--', lw=2)
-plt.xlabel('Preço Real')
-plt.ylabel('Preço Previsto')
-plt.title('Preço Real vs Preço Previsto (Redes Neurais)')
-plt.show()
-
-
-# tabela que imprime os resultados do mse e mae de cada modelo
-data = {
-    'Modelo': ['Regressão Linear', 'Random Forest', 'K-Nearest Neighbors', 'Support Vector Regression', 'Redes Neurais'],
-    'MSE': [mse_linear, mse_rf, mse_knn, mse_svr, mse_nn],
-    'MAE': [mae_linear, mae_rf, mae_knn, mae_svr, mae_nn]
-}
-results = pd.DataFrame(data)
+results_df = pd.DataFrame(results)
 print(f'Valores de MSE e MAE de cada método de aprendizagem automática testado:')
-print(results)
-results.to_csv('results.csv', index=False)
+print(results_df)
+results_df.to_csv('results.csv', index=False)
 
-# fazer boxplot para identificar os outliers do csv normalized_merged_data
-data_merged.boxplot(column=['price'])
-plt.show()
-data_merged.boxplot(column=['latitude'])
-plt.show()
+
